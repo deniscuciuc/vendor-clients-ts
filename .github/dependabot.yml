@@ -9,6 +9,13 @@ updates:
     labels: [dependencies]
     commit-message:
       prefix: 'chore(deps)'
+    ignore:
+      # The type surface must not be wider than the engines floor. These
+      # packages declare `node: >=22`, so Node 26 typings would let the
+      # compiler bless an API that does not exist on the supported runtime.
+      # Raise this deliberately, together with `engines` and the CI matrix.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       # The toolchain moves together; a lone bump of one of these is noise.
       tooling:
