@@ -13,7 +13,10 @@ that matter to a consumer are recorded:
 The format is [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packages follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html) independently of one another.
 
-## [Unreleased]
+## [0.1.0] - 2026-09-22
+
+First publish of all four packages to npm. Released before any changeset
+existed, so the per-package changelogs start from the next version.
 
 ### Added
 
@@ -32,3 +35,12 @@ The format is [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the 
   loaded no setup files and had no network stub at all — the suite's one hard rule would
   silently not have applied to it. It also lacked `tsconfig.test.json`, leaving its tests
   type-checked by nothing.
+
+### Known issues
+
+- The 0.1.0 tarballs were published **without a provenance attestation**. The
+  workflow set `NPM_CONFIG_PROVENANCE` in the job environment, but the variable
+  did not survive `changeset publish` spawning pnpm. Fixed by `provenance=true`
+  in a committed `.npmrc`, and the publish workflow now queries the registry
+  afterwards and warns if an attestation is missing. The already-published
+  0.1.0 tarballs cannot be attested retroactively; 0.1.1 onwards will be.

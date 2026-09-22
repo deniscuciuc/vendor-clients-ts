@@ -64,6 +64,33 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: 'true'
 
+      # Provenance is easy to lose and silent when lost.
+      #
+      # The first release set NPM_CONFIG_PROVENANCE in the job environment and
+      # the packages still went out unattested: `changeset publish` spawns
+      # pnpm, and the variable did not survive the hop. `provenance=true` in
+      # the committed .npmrc is the fix, but nothing about it is visible until
+      # a tarball is already on npm — so check the registry and say so.
+      #
+      # A warning rather than a failure: the packages are published by now, and
+      # failing here would not un-publish them.
+      - name: Verify provenance landed
+        run: |
+          missing=0
+          for dir in packages/*/; do
+            name=$(node -p "require('./${dir}package.json').name")
+            version=$(node -p "require('./${dir}package.json').version")
+            if npm view "$name@$version" dist.attestations --json 2>/dev/null | grep -q .; then
+              echo "  $name@$version: attested"
+            else
+              echo "::warning::$name@$version published without a provenance attestation"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "::warning::$missing package(s) lack provenance. Check that provenance=true in .npmrc reaches pnpm, and that this job has id-token: write."
+          fi
+
       # --tags rather than --follow-tags: the tags sit on a commit that is
       # already pushed.
       - name: Push tags
@@ -99,17 +126,35 @@ jobs:
           NAME="${TAG%@*}"       # @deniscuciuc/bnm
           VERSION="${TAG##*@}"   # 0.2.0
           FOLDER="${NAME##*/}"   # bnm
-          # awk reads the version from the environment rather than having it
-          # interpolated into the program text, so a tag name is never run as
-          # code. An exact string compare needs no escaping at all.
-          awk -v v="$VERSION" '
-            $0 == "## " v { found = 1; next }
-            found && /^## / { exit }
-            found { print }
-          ' "packages/$FOLDER/CHANGELOG.md" > /tmp/release-notes.md
+          CHANGELOG="packages/$FOLDER/CHANGELOG.md"
+
+          if [ -f "$CHANGELOG" ]; then
+            # awk reads the version from the environment rather than having it
+            # interpolated into the program text, so a tag name is never run as
+            # code. An exact string compare needs no escaping at all.
+            awk -v v="$VERSION" '
+              $0 == "## " v { found = 1; next }
+              found && /^## / { exit }
+              found { print }
+            ' "$CHANGELOG" > /tmp/release-notes.md
+          fi
+
+          # Missing notes are a warning here, never an error.
+          #
+          # This job runs *after* the packages are on npm, and npm is the
+          # irreversible half. Failing now un-publishes nothing — it only
+          # withholds the release notes and leaves tags pushed with no
+          # matching Release, which is a worse state than a thin Release.
+          # The first publish hit exactly that: no package had a CHANGELOG.md
+          # yet, because `changeset version` had never run.
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "::error::No CHANGELOG.md section for $TAG"
-            exit 1
+            echo "::warning::No CHANGELOG.md section for $TAG; publishing a minimal release body"
+            {
+              echo "\`$NAME@$VERSION\` is on npm:"
+              echo "<https://www.npmjs.com/package/$NAME/v/$VERSION>"
+              echo
+              echo "No changelog section was found for this version."
+            } > /tmp/release-notes.md
           fi
           cat /tmp/release-notes.md
 
