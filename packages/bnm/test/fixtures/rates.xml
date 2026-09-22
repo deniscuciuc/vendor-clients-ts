@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValCurs Date="09.09.2026" name="Official exchange rate">
+  <Valute ID="47">
+    <NumCode>978</NumCode>
+    <CharCode>EUR</CharCode>
+    <Nominal>1</Nominal>
+    <Name>Euro</Name>
+    <Value>19.5432</Value>
+  </Valute>
+  <Valute ID="44">
+    <NumCode>840</NumCode>
+    <CharCode>USD</CharCode>
+    <Nominal>1</Nominal>
+    <Name>Dolar SUA</Name>
+    <Value>17.1020</Value>
+  </Valute>
+  <Valute ID="35">
+    <NumCode>946</NumCode>
+    <CharCode>RON</CharCode>
+    <Nominal>10</Nominal>
+    <Name>Leu romanesc</Name>
+    <Value>39.2600</Value>
+  </Valute>
+  <Valute ID="52">
+    <NumCode>392</NumCode>
+    <CharCode>JPY</CharCode>
+    <Nominal>100</Nominal>
+    <Name>Yen japonez</Name>
+    <Value>11.5300</Value>
+  </Valute>
+</ValCurs>

@@ -1,0 +1,56 @@
+{
+  "name": "@deniscuciuc/maib",
+  "version": "0.1.0",
+  "description": "Unofficial client for the maib e-commerce card acquiring API (Moldova Agroindbank)",
+  "keywords": [
+    "maib",
+    "moldova",
+    "payments",
+    "acquiring",
+    "ecommerce",
+    "mdl",
+    "api-client",
+    "unofficial"
+  ],
+  "license": "MIT",
+  "author": "Denis Cuciuc <denis@deniscuciuc.dev>",
+  "homepage": "https://github.com/deniscuciuc/vendor-clients-ts/tree/main/packages/maib#readme",
+  "bugs": {
+    "url": "https://github.com/deniscuciuc/vendor-clients-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deniscuciuc/vendor-clients-ts.git",
+    "directory": "packages/maib"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "clean": "shx rm -rf dist"
+  },
+  "devDependencies": {
+    "shx": "^0.4.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

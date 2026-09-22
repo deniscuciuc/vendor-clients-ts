@@ -1,0 +1,11 @@
+{
+  "result": {
+    "payId": "pay-1",
+    "orderId": "invoice-1",
+    "status": "OK",
+    "statusCode": "000",
+    "amount": "299.00",
+    "currency": "MDL"
+  },
+  "signature": "the test recomputes this signature: it depends on a key we do not have"
+}

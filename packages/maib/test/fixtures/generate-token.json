@@ -1,0 +1,8 @@
+{
+  "result": {
+    "accessToken": "access-1",
+    "expiresIn": 3600,
+    "refreshToken": "refresh-1",
+    "refreshExpiresIn": 86400
+  }
+}

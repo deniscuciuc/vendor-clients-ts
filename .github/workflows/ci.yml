@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  # Every branch, not just main: a feature branch should not have to become a
+  # pull request before anything is checked.
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Verify (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Node 20 reached end of life in April 2026, so 22 is the floor, and it
+        # is the floor the packages declare in `engines`.
+        node-version: ['22', '24']
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      # No registry and no token: everything resolves from the public npm.
+      # If this step ever needs credentials, a private dependency has crept
+      # back in and the packages have stopped being installable by a stranger.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+      # api, docs, invariants and this repository's own vendors rule.
+      - name: Repository rules
+        run: pnpm repo:check
+
+      # The rules' own failing tests. A rule that has never been made to fail
+      # is a rule nobody knows works at all.
+      - name: Rule tests
+        run: pnpm test:scripts
+
+      # Catches a wrong `files`, `exports` or `types` entry, which no test
+      # inside the workspace can: in here everything resolves from source.
+      - name: Pack every package
+        run: pnpm -r exec pnpm pack --pack-destination "$RUNNER_TEMP/tarballs"
+
+      - name: Check the tarballs are what we think they are
+        run: |
+          cd "$RUNNER_TEMP/tarballs"
+          ls -1 *.tgz
+          test "$(ls -1 *.tgz | wc -l)" -eq 4
+          for f in *.tgz; do
+            # dist/ must be there and src/ must not: the sources do not ship,
+            # which is also why the published tsconfig turns source maps off.
+            tar -tzf "$f" | grep -q 'package/dist/index.js' || { echo "::error::$f has no dist/index.js"; exit 1; }
+            tar -tzf "$f" | grep -q 'package/LICENSE'       || { echo "::error::$f has no LICENSE"; exit 1; }
+            if tar -tzf "$f" | grep -q 'package/src/'; then echo "::error::$f ships src/"; exit 1; fi
+          done

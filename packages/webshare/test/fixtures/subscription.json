@@ -1,0 +1,12 @@
+{
+  "id": 1234,
+  "plan": 5678,
+  "term": "monthly",
+  "start_date": "2026-09-01T00:00:00.000000Z",
+  "end_date": "2026-10-01T00:00:00.000000Z",
+  "renewals_enabled": true,
+  "paused": false,
+  "throttled": false,
+  "created_at": "2026-08-01T12:00:00.000000Z",
+  "updated_at": "2026-09-01T12:00:00.000000Z"
+}

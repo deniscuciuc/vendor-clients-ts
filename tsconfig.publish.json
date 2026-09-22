@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    /*
+     * Maps are not published.
+     *
+     * `declarationMap` and `sourceMap` point at `../src/*.ts`, and the sources
+     * never reach the tarball: `files` is `["dist"]`. A consumer would get maps
+     * leading nowhere, and go-to-definition would break silently instead of
+     * simply being absent. Inside the workspace the maps are not needed — there
+     * packages are built from source.
+     */
+    "declarationMap": false,
+    "sourceMap": false
+  }
+}

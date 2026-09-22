@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels: [dependencies]
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      # The toolchain moves together; a lone bump of one of these is noise.
+      tooling:
+        patterns: ['@biomejs/*', 'turbo', 'typescript', 'shx', 'lefthook']
+      vitest:
+        patterns: ['vitest', '@vitest/*']
+      changesets:
+        patterns: ['@changesets/*']
+      commitlint:
+        patterns: ['@commitlint/*']
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: 'ci(deps)'
+    groups:
+      actions:
+        patterns: ['*']

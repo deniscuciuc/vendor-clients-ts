@@ -1,0 +1,46 @@
+name: Version
+
+# Opens and updates the "Version Packages" pull request. Publishes nothing:
+# opening a pull request is reversible, so it needs no gate.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: version-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  version:
+    name: Open the Version Packages PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # commit the version bumps to the release branch
+      pull-requests: write # and open the pull request itself
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
+          title: 'chore: version packages'
+          commit: 'chore: version packages'
+        env:
+          # Needed by the action, and again by @changesets/changelog-github,
+          # which calls the API while versioning to turn each commit into a
+          # link to its pull request and author.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

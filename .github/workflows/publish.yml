@@ -1,0 +1,124 @@
+name: Publish
+
+# Started by hand. There is deliberately no automatic publish on merge: a
+# published version cannot be recalled fast enough that nobody has installed
+# it, so "this version goes out" has to be its own decision.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    # Publishing is irreversible. Configure the `npm` environment with a
+    # required reviewer in the repository settings to gate it.
+    environment: npm
+    permissions:
+      contents: write # push tags
+      id-token: write # npm provenance
+    outputs:
+      tags: ${{ steps.tags.outputs.list }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+      - name: Repository rules
+        run: pnpm repo:check
+
+      # Before publishing, because publishing is what creates the tags.
+      #
+      # `changeset publish` tags with `git tag <name> -m <name>` — an annotated
+      # tag, which needs a committer. Without these two lines the command
+      # fails, changesets does not check its exit code, and the log is left
+      # with a cheerful `New tag:` and no tag at all.
+      - name: Git identity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Publish
+        # Provenance signs an attestation linking each tarball to this workflow
+        # run; it needs the id-token permission above and a public repository.
+        run: pnpm changeset publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      # --tags rather than --follow-tags: the tags sit on a commit that is
+      # already pushed.
+      - name: Push tags
+        run: git push --tags
+
+      - name: Collect the tags this run created
+        id: tags
+        run: |
+          git tag --points-at HEAD \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))' \
+            | sed 's/^/list=/' >> "$GITHUB_OUTPUT"
+
+  release:
+    name: GitHub Release
+    needs: publish
+    if: ${{ needs.publish.outputs.tags != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ${{ fromJson(needs.publish.outputs.tags) }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Extract the changelog section for this tag
+        env:
+          TAG: ${{ matrix.tag }}
+        run: |
+          # A changesets tag looks like @deniscuciuc/bnm@0.2.0.
+          NAME="${TAG%@*}"       # @deniscuciuc/bnm
+          VERSION="${TAG##*@}"   # 0.2.0
+          FOLDER="${NAME##*/}"   # bnm
+          # awk reads the version from the environment rather than having it
+          # interpolated into the program text, so a tag name is never run as
+          # code. An exact string compare needs no escaping at all.
+          awk -v v="$VERSION" '
+            $0 == "## " v { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' "packages/$FOLDER/CHANGELOG.md" > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "::error::No CHANGELOG.md section for $TAG"
+            exit 1
+          fi
+          cat /tmp/release-notes.md
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ matrix.tag }}
+          name: ${{ matrix.tag }}
+          body_path: /tmp/release-notes.md
+          generate_release_notes: false
+          # Four independently versioned packages: there is no single "latest"
+          # release for the repository.
+          make_latest: false

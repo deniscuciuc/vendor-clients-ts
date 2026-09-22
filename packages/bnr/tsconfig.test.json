@@ -1,0 +1,19 @@
+{
+  /*
+   * Type-checking, tests included.
+   *
+   * The main tsconfig excludes `*.test.ts` so they never reach `dist`. That
+   * left a hole: test files were type-checked by nothing at all — Vitest only
+   * transpiles them — and a mistake in a test was visible only when it failed
+   * at runtime, and never visible if the test passed by accident.
+   *
+   * Found in a sibling repository where this configuration had been copied,
+   * and the first honest run turned up a real error in an enum there.
+   */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "exclude": []
+}

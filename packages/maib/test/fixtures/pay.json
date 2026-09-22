@@ -1,0 +1,7 @@
+{
+  "result": {
+    "payUrl": "https://maib.example/checkout/pay-1",
+    "payId": "pay-1",
+    "orderId": "invoice-1"
+  }
+}

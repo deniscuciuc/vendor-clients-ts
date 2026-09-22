@@ -1,0 +1,51 @@
+{
+  "name": "@deniscuciuc/__VENDOR__",
+  "version": "0.1.0",
+  "description": "FILL IN: which API this is and what it gives you",
+  "keywords": [
+    "__VENDOR__",
+    "api-client",
+    "unofficial"
+  ],
+  "license": "MIT",
+  "author": "Denis Cuciuc <denis@deniscuciuc.dev>",
+  "homepage": "https://github.com/deniscuciuc/vendor-clients-ts/tree/main/packages/__VENDOR__#readme",
+  "bugs": {
+    "url": "https://github.com/deniscuciuc/vendor-clients-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deniscuciuc/vendor-clients-ts.git",
+    "directory": "packages/__VENDOR__"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "clean": "shx rm -rf dist"
+  },
+  "devDependencies": {
+    "shx": "^0.4.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

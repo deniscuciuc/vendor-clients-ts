@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataSet xmlns="http://www.bnr.ro/xsd">
+  <Header>
+    <Publisher>National Bank of Romania</Publisher>
+    <PublishingDate>2026-09-09</PublishingDate>
+  </Header>
+  <Body>
+    <Subject>Reference rates</Subject>
+    <OrigCurrency>RON</OrigCurrency>
+    <Cube date="2026-09-09">
+      <Rate currency="EUR">4.9756</Rate>
+      <Rate currency="USD">4.3521</Rate>
+      <Rate currency="HUF" multiplier="100">1.2604</Rate>
+      <Rate currency="JPY" multiplier="100">2.9410</Rate>
+    </Cube>
+  </Body>
+</DataSet>
