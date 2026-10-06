@@ -23,16 +23,16 @@
     "api:snapshot": "node scripts/repo-check.mjs snapshot api"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.12",
+    "@biomejs/biome": "^2.5.15",
     "@changesets/cli": "^2.29.9",
     "@changesets/changelog-github": "^0.5.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^22.19.0",
     "@vitest/coverage-v8": "^5.0.0",
-    "lefthook": "^2.1.12",
+    "lefthook": "^2.1.16",
     "shx": "^0.4.0",
-    "turbo": "^2.10.12",
+    "turbo": "^2.11.7",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }
